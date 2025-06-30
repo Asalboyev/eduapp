@@ -12,10 +12,15 @@ class RegisterModelSerializer(ModelSerializer):
         fields = ['email', 'password']
 
     def create(self, validated_data):
+        email = validated_data["email"]
+        password = validated_data["password"]
+        username = email.split('@')[0]
+
         user = User(
-            email=validated_data["email"],
+            email=email,
+            username=username,
         )
-        user.set_password(validated_data["password"])
+        user.set_password(password)
         user.is_active = False
         user.save()
         return user
