@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
-from django.db.models import TextChoices, CharField, EmailField, TextField, ImageField
+from django.db.models import TextChoices, CharField, EmailField, TextField, ImageField, BooleanField
 
 
 class CustomUserManager(BaseUserManager):
@@ -35,6 +35,9 @@ class User(AbstractUser, PermissionsMixin):
     avatar = ImageField(upload_to='images/users/', blank=True, null=True)
     bio = TextField(blank=True)
     phone_number = CharField(max_length=20, unique=True, blank=True, null=True)
+
+    is_verify = BooleanField(default=False)
+    
     objects = CustomUserManager()
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"

@@ -1,5 +1,5 @@
 from random import randint
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
@@ -31,11 +31,16 @@ class RegisterAPIView(CreateAPIView):
         if serializer.is_valid():
             if not user:
                 user = serializer.save()
+
             random_code = randint(10000, 99999)
             send_email.delay(email, random_code)
             cache.set(email, str(random_code), timeout=300)
-            return JsonResponse({
+
+            refresh = RefreshToken.for_user(user)
+            return Response({
                 "message": f"{email} manziliga tasdiqlash kodi jo'natildi!",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
             }, status=HTTP_200_OK)
 
         return JsonResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
@@ -44,12 +49,14 @@ class RegisterAPIView(CreateAPIView):
 @extend_schema(tags=['auth'], request=RegisterCheckSerializer)
 class RegisterCheckAPIView(GenericAPIView):
     serializer_class = RegisterCheckSerializer
+    permission_classes = [IsAuthenticated]
+
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            updated = User.objects.filter(email=email).update(is_active=True)
+            email = request.user.email
+            updated = User.objects.filter(email=email).update(is_verify=True)
             if updated:
                 cache.delete(email)
                 return JsonResponse(

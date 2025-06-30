@@ -21,18 +21,20 @@ class RegisterModelSerializer(ModelSerializer):
             username=username,
         )
         user.set_password(password)
-        user.is_active = False
         user.save()
         return user
 
 class RegisterCheckSerializer(Serializer):
-    email = EmailField(required=True)
     code = IntegerField(required=True)
 
     def validate(self, data):
-        verify_code = cache.get(data["email"])
+        email = self.context["request"].user.email
+        verify_code = cache.get(email)
+        
         if not verify_code:
             raise ValidationError({"code": "Tasdiqlash kodi eskirgan yoki noto‘g‘ri!"})
+        
         if str(data["code"]) != str(verify_code):
             raise ValidationError({"code": "Noto‘g‘ri kod!"})
+        
         return data
