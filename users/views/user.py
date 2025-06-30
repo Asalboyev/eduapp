@@ -32,7 +32,7 @@ class RegisterAPIView(CreateAPIView):
             if not user:
                 user = serializer.save()
             random_code = randint(10000, 99999)
-            # send_email.delay(email, random_code)
+            send_email.delay(email, random_code)
             cache.set(email, str(random_code), timeout=300)
             return JsonResponse({
                 "message": f"{email} manziliga tasdiqlash kodi jo'natildi!",
