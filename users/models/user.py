@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
-from django.db.models import TextChoices, CharField, EmailField, TextField, ImageField
+from django.db.models import TextChoices, CharField, EmailField, TextField, ImageField, Model, ForeignKey, CASCADE, \
+    BooleanField, TimeField
 
 
 class CustomUserManager(BaseUserManager):
@@ -42,3 +43,11 @@ class User(AbstractUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class UserProgress(Model):
+    user_id = ForeignKey("User", CASCADE, related_name="progress")
+    lesson_id = ForeignKey("Lessons", CASCADE ,related_name="progress")
+    is_completed = BooleanField(default=False)
+    last_accessed = TimeField(auto_now=True)
+    completed_at = TimeField(auto_now=True)
