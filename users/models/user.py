@@ -52,8 +52,8 @@ class User(AbstractUser, PermissionsMixin):
 
 
 class UserProgress(Model):
-    user_id = ForeignKey(User, CASCADE, related_name="progress")
-    lesson_id = ForeignKey("course.Lessons", CASCADE, related_name="progress")
+    user = ForeignKey(User, CASCADE, related_name="progress")
+    lesson = ForeignKey("course.Lesson", CASCADE, related_name="user_progress")
     is_completed = BooleanField(default=False)
     last_accessed = TimeField(auto_now=True)
     completed_at = TimeField(auto_now=True)
