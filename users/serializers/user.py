@@ -24,6 +24,7 @@ class RegisterModelSerializer(ModelSerializer):
         user.save()
         return user
 
+
 class RegisterCheckSerializer(Serializer):
     code = IntegerField(required=True)
 
@@ -38,3 +39,7 @@ class RegisterCheckSerializer(Serializer):
             raise ValidationError({"code": "Noto‘g‘ri kod!"})
         
         return data
+    
+
+class ResendCodeSerializer(Serializer):
+    email = EmailField()

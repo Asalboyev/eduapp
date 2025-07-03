@@ -10,8 +10,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NO
 from rest_framework.views import APIView
 
 from users.models import User
-from users.serializers import RegisterModelSerializer
-from users.serializers.user import RegisterCheckSerializer
+from users.serializers import RegisterCheckSerializer, ResendCodeSerializer, RegisterModelSerializer
 
 from users.tasks import send_email
 
@@ -68,3 +67,33 @@ class RegisterCheckAPIView(GenericAPIView):
                 status=HTTP_404_NOT_FOUND
             )
         return JsonResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    
+
+@extend_schema(request=ResendCodeSerializer)
+class ResendCodeAPIView(APIView):
+    def post(self, request):
+        serializer = ResendCodeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        email = serializer.validated_data['email']
+
+        if not email:
+            return Response({"error": "Email manzili yuborilishi kerak."}, status=HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"error": "Bunday email bilan foydalanuvchi topilmadi."}, status=HTTP_404_NOT_FOUND)
+
+        if user.is_verify:
+            return Response({"message": "Ushbu foydalanuvchi allaqachon tasdiqlangan."}, status=HTTP_400_BAD_REQUEST)
+
+        if cache.get(email):
+            return Response({"message": "Tasdiqlash kodi allaqachon yuborilgan. Iltimos, kuting."}, status=HTTP_400_BAD_REQUEST)
+
+        code = randint(10000, 99999)
+        send_email.delay(email, code)
+        cache.set(email, str(code), timeout=300)
+
+        return Response({"message": "Tasdiqlash kodi qayta yuborildi."}, status=HTTP_200_OK)
+

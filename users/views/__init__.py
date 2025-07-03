@@ -1,1 +1,1 @@
-from users.views.user import RegisterAPIView, RegisterCheckAPIView
+from users.views.user import RegisterAPIView, RegisterCheckAPIView, ResendCodeAPIView

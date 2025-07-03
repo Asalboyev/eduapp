@@ -9,14 +9,19 @@ from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 
 
+class BaseCreatedModel(Model):
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 
-class Category(Model):
+class Category(BaseCreatedModel):
     name = CharField(max_length=255)
     slug = SlugField(unique=True, max_length=255, editable=False)
     description = TextField()
-    created_at = TimeField(default=now)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -29,7 +34,7 @@ class Category(Model):
         return self.name
 
 
-class Course(Model):
+class Course(BaseCreatedModel):
     title = CharField(max_length=255)
     slug = SlugField(max_length=255, unique=True, editable=False)
     description = TextField(blank=True, null=True)
@@ -39,9 +44,7 @@ class Course(Model):
     thumbnail_url = CharField(max_length=255, blank=True, null=True)
     is_published = BooleanField(default=False)
     created_by = IntegerField()
-    created_at = DateTimeField(auto_now_add=True)
-    updated_at = DateTimeField(auto_now=True)
-
+    
     categories = ManyToManyField(Category, related_name='courses')
 
 
@@ -61,8 +64,7 @@ class Course(Model):
 
 
 
-
-class CourseSection(Model):
+class CourseSection(BaseCreatedModel):
     course = ForeignKey('Course', on_delete=CASCADE, related_name="course_sections")
     title = CharField(max_length=255)
     order_index = IntegerField()
@@ -71,7 +73,7 @@ class CourseSection(Model):
         return f"{self.course.title} - {self.title}"
 
 
-class Lesson(Model):
+class Lesson(BaseCreatedModel):
     section = ForeignKey(CourseSection, on_delete=CASCADE, related_name="section_lessons")
     title = CharField(max_length=255)
     content = TextField()
@@ -81,15 +83,14 @@ class Lesson(Model):
     is_preview = BooleanField(default=False)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} -> {self.section.title}"
 
 
-class CourseReview(Model):
+class CourseReview(BaseCreatedModel):
     course = ForeignKey('Course', on_delete=CASCADE, related_name='course_reviews')
     user = ForeignKey(get_user_model(), on_delete=CASCADE, related_name='course_reviews')
     rating = IntegerField()
     comment = TextField()
-    created_at = DateTimeField(default=now)
 
     def __str__(self):
         return f"{self.user} rated {self.course} - {self.rating}⭐"

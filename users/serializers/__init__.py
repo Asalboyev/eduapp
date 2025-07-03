@@ -1,1 +1,1 @@
-from users.serializers.user import RegisterModelSerializer, RegisterCheckSerializer
+from users.serializers.user import RegisterModelSerializer, RegisterCheckSerializer, ResendCodeSerializer

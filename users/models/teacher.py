@@ -5,7 +5,7 @@ from users.models import User
 
 
 class TeacherProfiles(Model):
-    user_id =  ForeignKey(User, CASCADE, related_name='teacher_profiles')
+    user =  ForeignKey(User, CASCADE, related_name='teacher_profiles')
     specialization =  CharField(max_length=255)
     experience_years =  IntegerField()
     website_url = CharField(max_length=255)
@@ -15,7 +15,7 @@ class TeacherProfiles(Model):
 
 
 class TeacherProjects(Model):
-    user_id = ForeignKey("User", CASCADE, related_name='teacher_projects')
+    user = ForeignKey("User", CASCADE, related_name='teacher_projects')
     title = CharField(max_length=255)
     description = TextField()
     project_url = CharField(max_length=255)
