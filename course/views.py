@@ -1,3 +1,19 @@
-from django.shortcuts import render
+from rest_framework import generics, permissions
+from drf_spectacular.utils import extend_schema
 
-# Create your views here.
+from .models import Category
+from .serializers import CategorySerializer
+from .permissions import IsAdminUserByType
+
+
+@extend_schema(tags=['course'])
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+@extend_schema(tags=['course'])
+class CategoryCreateView(generics.CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUserByType]

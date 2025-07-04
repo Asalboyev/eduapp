@@ -8,7 +8,7 @@ from .models import (
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_at', 'id')
+    list_display = ('name', 'slug', 'created_at', 'id')
     search_fields = ('name', )
 
 

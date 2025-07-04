@@ -3,7 +3,7 @@ from users.models import User, UserProgress, TeacherProjects, TeacherProfiles
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'is_verify')
+    list_display = ('username', 'email', 'is_staff', 'is_active', 'is_verify', 'role')
     search_fields = ('username', 'email')
 
 
