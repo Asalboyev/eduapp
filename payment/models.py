@@ -10,16 +10,16 @@ from users.models.user import User
 
 class Enrollments(Model):
     class PaymentMethod(TextChoices):
-        CLICK = 'Click'
-        PAYME = 'PayMe'
-        CASH = 'Cash'
-        OTHER = 'Other'
+        CLICK = 'click', 'Click'
+        PAYME = 'payme', 'PayMe'
+        CASH = 'cash', 'Cash'
+        OTHER = 'other', 'Other'
 
     class PaymentStatus(TextChoices):
-        PENDING = 'Pending'
-        COMPLETED = 'Completed'
-        FAILED = 'Failed'
-        REFUNDED = 'Refunded'
+        PENDING = 'pending', 'Pending'
+        COMPLETED = 'completed', 'Completed'
+        FAILED = 'failed', 'Failed'
+        REFUNDED = 'refunded', 'Refunded'
 
     user_id = ForeignKey(User, CASCADE, related_name="enrollments")
     course_id = ForeignKey(Course, CASCADE, related_name="enrollments")
@@ -32,16 +32,16 @@ class Enrollments(Model):
 
 class Payments(Model):
     class PaymentMethod(TextChoices):
-        CLICK = 'Click'
-        PAYME = 'PayMe'
-        CASH = 'Cash'
-        OTHER = 'Other'
+        CLICK = 'click','Click'
+        PAYME = 'payme','PayMe'
+        CASH = 'cash','Cash'
+        OTHER = 'other','Other'
 
     class PaymentStatus(TextChoices):
-        PENDING = 'Pending'
-        COMPLETED = 'Completed'
-        FAILED = 'Failed'
-        REFUNDED = 'Refunded'
+        PENDING = 'pending','Pending'
+        COMPLETED = 'completed','Completed'
+        FAILED = 'failed','Failed'
+        REFUNDED = 'refunded','Refunded'
 
     user_id = ForeignKey(User, CASCADE, related_name="enrollments")
     course_id = ForeignKey(Course, CASCADE, related_name="enrollments")
