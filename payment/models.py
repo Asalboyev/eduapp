@@ -21,8 +21,8 @@ class Enrollments(Model):
         FAILED = 'failed', 'Failed'
         REFUNDED = 'refunded', 'Refunded'
 
-    user_id = ForeignKey(User, CASCADE, related_name="enrollments")
-    course_id = ForeignKey(Course, CASCADE, related_name="enrollments")
+    user = ForeignKey(User, CASCADE, related_name="enrollments")
+    course = ForeignKey(Course, CASCADE, related_name="enrollments")
     enrolled_at = TimeField(default=now)
     completed_at = TimeField(default=now)
     payment_method = CharField(max_length=20, choices=PaymentMethod.choices)
@@ -43,11 +43,11 @@ class Payments(Model):
         FAILED = 'failed','Failed'
         REFUNDED = 'refunded','Refunded'
 
-    user_id = ForeignKey(User, CASCADE, related_name="enrollments")
-    course_id = ForeignKey(Course, CASCADE, related_name="enrollments")
+    user = ForeignKey(User, CASCADE, related_name="enrollments")
+    course = ForeignKey(Course, CASCADE, related_name="enrollments")
     amount = DecimalField(max_digits=10, decimal_places=2)
     payment_method = CharField(max_length=20, choices=PaymentMethod.choices)
-    transaction_id = CharField(max_length=100, unique=True)
+    transactionID = CharField(max_length=100, unique=True)
     payment_status =CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
     created_at = TimeField(default=now)
     updated_at = TimeField(default=now)
