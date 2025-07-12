@@ -24,7 +24,7 @@ class CategoryUpdateView(generics.UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUserByType]
-    lookup_field = 'id'
+    lookup_field = 'slug'
 
 
 @extend_schema(tags=['course(category)'])
@@ -32,7 +32,7 @@ class CategoryDeleteView(generics.DestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUserByType]
-    lookup_field = 'id'
+    lookup_field = 'slug'
 
 
 

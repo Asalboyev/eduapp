@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Category, Course,
-    CourseSection, CourseReview, Lesson
+    CourseSection, Lesson, CourseReview
 )
 
 
@@ -32,7 +32,7 @@ class CourseSectionsAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'section_id', 'video_url', 'duration', 'is_preview', 'id')
+    list_display = ('title', 'section_id', 'video_url', 'duration', 'is_preview', 'is_free',  'id')
     search_fields = ('title', )
 
 
