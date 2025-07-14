@@ -1,8 +1,12 @@
 from rest_framework import generics, permissions
 from drf_spectacular.utils import extend_schema
-
+from django.db.models import Q, F
 from .models import Category, Course, CourseSection, Lesson
-from .serializers import CategorySerializer, CourseSerializer, CourseSectionSerializer, LessonSerializer
+from payment.models import Enrollments
+from .serializers import (
+    CategorySerializer, CourseSerializer, CourseSectionSerializer,
+    LessonSerializer
+)
 from .permissions import IsAdminUserByType
 
 
@@ -43,11 +47,53 @@ class CourseCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminUserByType]
 
 
+# @extend_schema(tags=['course(course)'])
+# class CourseListView(generics.ListAPIView):
+#     # queryset = Course.objects.filter(is_published=True)
+#     queryset = Course.objects.all()
+#     serializer_class = CourseSerializer
+
+
 @extend_schema(tags=['course(course)'])
 class CourseListView(generics.ListAPIView):
-    # queryset = Course.objects.filter(is_published=True)
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+    def get_permissions(self):
+        if self.request.user.is_authenticated:
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # bu kurslarni hamma kura oladi login qilgan yoki qilmagan va tekin kurslar
+        if not user.is_authenticated:
+            return Course.objects.filter(
+                is_published=True,
+                price__in=[None, 0]
+            )
+
+        
+        # faqat superuser yoki adminlar ko'radi bularni
+        if user.is_superuser or user.role == 'admin':
+            return Course.objects.all()
+
+        # kiyinchalik har bir ustoz o'zi yaratgan kurslarni kuradi
+        if user.role == 'teacher':
+            return Course.objects.filter(created_by=user.id)
+
+        # student to'liq to'lagan va is_published kurslarni kuradi, tekin kurslarni ham
+        enrolled_course_ids = Enrollments.objects.filter(
+            user=user,
+            payment_status='completed',
+        ).values_list('course_id', flat=True)
+
+        return Course.objects.filter(
+            Q(id__in=enrolled_course_ids) |
+            Q(is_published=True, price__in=[None, 0])
+        ).distinct()
+
+
 
 @extend_schema(tags=['course(course)'])
 class CourseUpdateView(generics.UpdateAPIView):

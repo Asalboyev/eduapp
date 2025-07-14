@@ -35,7 +35,8 @@ INSTALLED_APPS = [
 
     # my apps
     'users',
-    'course'
+    'course',
+    'payment',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +111,7 @@ MEDIA_ROOT = join(BASE_DIR, 'media')
 MEDIA_URL = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 REST_FRAMEWORK = {
      'DEFAULT_PERMISSION_CLASSES': [
