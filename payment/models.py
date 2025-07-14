@@ -6,8 +6,6 @@ from course.models import Course
 from users.models.user import User
 
 
-# Create your models here.
-
 class Enrollments(Model):
     class PaymentMethod(TextChoices):
         CLICK = 'click', 'Click'
@@ -23,8 +21,8 @@ class Enrollments(Model):
 
     user = ForeignKey(User, CASCADE, related_name="enrollments")
     course = ForeignKey(Course, CASCADE, related_name="enrollments")
-    enrolled_at = TimeField(default=now)
-    completed_at = TimeField(default=now)
+    enrolled_at = models.DateTimeField(default=now)
+    completed_at = models.DateTimeField(null=True, blank=True)
     payment_method = CharField(max_length=20, choices=PaymentMethod.choices)
     payment_amount = DecimalField(max_digits=10, decimal_places=2)
     payment_status =CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
@@ -43,12 +41,12 @@ class Payments(Model):
         FAILED = 'failed','Failed'
         REFUNDED = 'refunded','Refunded'
 
-    user = ForeignKey(User, CASCADE, related_name="enrollments")
-    course = ForeignKey(Course, CASCADE, related_name="enrollments")
+    user = ForeignKey(User, CASCADE, related_name="payments")
+    course = ForeignKey(Course, CASCADE, related_name="course_payments")
     amount = DecimalField(max_digits=10, decimal_places=2)
     payment_method = CharField(max_length=20, choices=PaymentMethod.choices)
     transactionID = CharField(max_length=100, unique=True)
     payment_status =CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
-    created_at = TimeField(default=now)
-    updated_at = TimeField(default=now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
