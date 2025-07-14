@@ -18,7 +18,8 @@ urlpatterns = [
     path('course-delete/<slug:slug>/', CourseDeleteView.as_view(), name='course-delete'),
 
     path('coursesection-create/', CourseCreateSectionView.as_view(), name='course section-create'),
-    path('coursesection-list/', CourseListSectionView.as_view(), name='course section-list'),
+    # path('coursesection-list/', CourseListSectionView.as_view(), name='course section-list'),
+    path("courses/<slug:slug>/sections/", CourseListSectionView.as_view(), name="course-sections-by-slug"),
     path('coursesection-update/<int:id>/', CourseUpdateSectionView.as_view(), name='course section-update'),
     path('coursesection-delete/<int:id>/', CourseDeleteSectionView.as_view(), name='course section-delete'),
 

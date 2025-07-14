@@ -1,8 +1,10 @@
 from rest_framework import generics, permissions
 from drf_spectacular.utils import extend_schema
 from django.db.models import Q, F
+from django.shortcuts import get_object_or_404
 from .models import Category, Course, CourseSection, Lesson
 from payment.models import Enrollments
+from users.models import User
 from .serializers import (
     CategorySerializer, CourseSerializer, CourseSectionSerializer,
     LessonSerializer
@@ -75,17 +77,17 @@ class CourseListView(generics.ListAPIView):
 
         
         # faqat superuser yoki adminlar ko'radi bularni
-        if user.is_superuser or user.role == 'admin':
+        if user.is_superuser or user.role == User.Role.ADMIN:
             return Course.objects.all()
 
         # kiyinchalik har bir ustoz o'zi yaratgan kurslarni kuradi
-        if user.role == 'teacher':
+        if user.role == User.Role.TEACHER:
             return Course.objects.filter(created_by=user.id)
 
         # student to'liq to'lagan va is_published kurslarni kuradi, tekin kurslarni ham
         enrolled_course_ids = Enrollments.objects.filter(
             user=user,
-            payment_status='completed',
+            payment_status=Enrollments.PaymentStatus.COMPLETED,
         ).values_list('course_id', flat=True)
 
         return Course.objects.filter(
@@ -109,16 +111,29 @@ class CourseDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAdminUserByType]
     lookup_field = 'slug'
 
+
 @extend_schema(tags=['course(course section)'])
 class CourseCreateSectionView(generics.CreateAPIView):
     queryset = CourseSection.objects.all()
     serializer_class = CourseSectionSerializer
     permission_classes = [IsAdminUserByType]
 
+
+# @extend_schema(tags=['course(course section)'])
+# class CourseListSectionView(generics.ListAPIView):
+#     queryset = CourseSection.objects.all()
+#     serializer_class = CourseSectionSerializer
+
+
 @extend_schema(tags=['course(course section)'])
 class CourseListSectionView(generics.ListAPIView):
-    queryset = CourseSection.objects.all()
     serializer_class = CourseSectionSerializer
+
+    def get_queryset(self):
+        course_slug = self.kwargs.get("slug")
+        course = get_object_or_404(Course, slug=course_slug, is_published=True)
+        return CourseSection.objects.filter(course=course).order_by("order_index")
+
 
 @extend_schema(tags=['course(course section)'])
 class CourseUpdateSectionView(generics.UpdateAPIView):
@@ -127,6 +142,7 @@ class CourseUpdateSectionView(generics.UpdateAPIView):
     permission_classes = [IsAdminUserByType]
     lookup_field = 'id'
 
+
 @extend_schema(tags=['course(course section)'])
 class CourseDeleteSectionView(generics.DestroyAPIView):
     queryset = CourseSection.objects.all()
@@ -134,16 +150,19 @@ class CourseDeleteSectionView(generics.DestroyAPIView):
     permission_classes = [IsAdminUserByType]
     lookup_field = 'id'
 
+
 @extend_schema(tags=['course(lesson)'])
 class LessonCreateView(generics.CreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [IsAdminUserByType]
 
+
 @extend_schema(tags=['course(lesson)'])
 class LessonListView(generics.ListAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+
 
 @extend_schema(tags=['course(lesson)'])
 class LessonUpdateView(generics.UpdateAPIView):
@@ -151,6 +170,7 @@ class LessonUpdateView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAdminUserByType]
     lookup_field = 'id'
+
 
 @extend_schema(tags=['course(lesson)'])
 class LessonDeleteView(generics.DestroyAPIView):
