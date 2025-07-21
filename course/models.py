@@ -101,4 +101,4 @@ class CourseReview(BaseCreatedModel):
     comment = TextField()
 
     def __str__(self):
-        return f"{self.user} rated {self.course} - {self.rating}⭐"
+        return f"{self.user} rated {self.course} - {self.rating}"

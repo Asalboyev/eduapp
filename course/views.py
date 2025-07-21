@@ -158,10 +158,46 @@ class LessonCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminUserByType]
 
 
+# @extend_schema(tags=['course(lesson)'])
+# class LessonListView(generics.ListAPIView):
+#     queryset = Lesson.objects.all()
+#     serializer_class = LessonSerializer
+
+#     def get_queryset(self):
+#         return Lesson.objects.filter(is_free=True).order_by("order_index")
+
+
 @extend_schema(tags=['course(lesson)'])
 class LessonListView(generics.ListAPIView):
-    queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        section_id = self.kwargs.get("section_id")
+
+        if not section_id:
+            return Lesson.objects.none()
+
+        try:
+            section = CourseSection.objects.select_related("course").get(id=section_id)
+        except CourseSection.DoesNotExist:
+            return Lesson.objects.none()
+
+        course = section.course
+
+
+        has_paid = Enrollments.objects.filter(
+            user=user,
+            course=course,
+            payment_status=Enrollments.PaymentStatus.COMPLETED
+        ).exists()
+
+        if has_paid:
+            return Lesson.objects.filter(section=section).order_by("order_index")
+        else:
+            return Lesson.objects.filter(section=section, is_free=True).order_by("order_index")
+
 
 
 @extend_schema(tags=['course(lesson)'])
