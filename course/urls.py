@@ -3,7 +3,7 @@ from .views import (
     CategoryListView, CategoryCreateView, CategoryUpdateView,
     CategoryDeleteView, CourseCreateView, CourseListView, CourseUpdateView, CourseDeleteView, CourseCreateSectionView,
     CourseListSectionView, CourseUpdateSectionView, CourseDeleteSectionView, LessonCreateView, LessonListView,
-    LessonDeleteView, LessonUpdateView
+    LessonDeleteView, LessonUpdateView, LessonDetailView
 )
 
 urlpatterns = [
@@ -24,6 +24,8 @@ urlpatterns = [
     # path('coursesection-delete/<int:id>/', CourseDeleteSectionView.as_view(), name='course section-delete'),
 
     path('lesson-create/', LessonCreateView.as_view(), name='lesson-create'),
+    path("lessons/<int:pk>/", LessonDetailView.as_view(), name="lesson-detail"),
+
     # path('lesson-list/', LessonListView.as_view(), name='lesson-list'),
     path('sections/<int:section_id>/lessons/', LessonListView.as_view(), name='lesson-by-section'),
 

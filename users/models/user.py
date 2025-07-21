@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission
 
 from django.db.models import (
     TextChoices, CharField, EmailField, TextField, ImageField,
-    Model, ForeignKey, CASCADE, BooleanField, TimeField
+    Model, ForeignKey, CASCADE, BooleanField, TimeField, DateTimeField
 )
 
 class CustomUserManager(BaseUserManager):
@@ -55,5 +55,5 @@ class UserProgress(Model):
     user = ForeignKey(User, CASCADE, related_name="progress")
     lesson = ForeignKey("course.Lesson", CASCADE, related_name="user_progress")
     is_completed = BooleanField(default=False)
-    last_accessed = TimeField(auto_now=True)
-    completed_at = TimeField(auto_now=True)
+    last_accessed = DateTimeField(auto_now=True)
+    completed_at = DateTimeField(null=True, blank=True)

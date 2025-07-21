@@ -1,15 +1,18 @@
 from rest_framework import generics, permissions
 from drf_spectacular.utils import extend_schema
 from django.db.models import Q, F
+from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Category, Course, CourseSection, Lesson
 from payment.models import Enrollments
-from users.models import User
+from users.models import User, UserProgress
 from .serializers import (
     CategorySerializer, CourseSerializer, CourseSectionSerializer,
-    LessonSerializer
+    LessonSerializer, LessonDetailSerializer
 )
 from .permissions import IsAdminUserByType
+
 
 
 @extend_schema(tags=['course(category)'])
@@ -197,6 +200,52 @@ class LessonListView(generics.ListAPIView):
             return Lesson.objects.filter(section=section).order_by("order_index")
         else:
             return Lesson.objects.filter(section=section, is_free=True).order_by("order_index")
+        
+
+
+@extend_schema(tags=["course(lesson)"])
+class LessonDetailView(generics.RetrieveAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        lesson = self.get_object()
+        user = request.user
+
+        if lesson.is_free:
+            UserProgress.objects.get_or_create(user=user, lesson=lesson)
+            return Response(self.get_serializer(lesson).data)
+
+        course = lesson.section.course
+        has_paid = Enrollments.objects.filter(
+            user=user,
+            course=course,
+            payment_status=Enrollments.PaymentStatus.COMPLETED
+        ).exists()
+
+        if not has_paid:
+            return Response(
+                {"detail": "Bu darsga kirish uchun kursga to‘lov qilishingiz kerak."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        previous_lessons = Lesson.objects.filter(
+            section=lesson.section,
+            order_index__lt=lesson.order_index
+        )
+
+        for prev in previous_lessons:
+            progress = UserProgress.objects.filter(user=user, lesson=prev, is_completed=True).first()
+            if not progress:
+                return Response(
+                    {"detail": f"Avval '{prev.title}' darsini to‘liq yakunlang."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        progress_obj, _ = UserProgress.objects.get_or_create(user=user, lesson=lesson)
+        return Response(self.get_serializer(lesson).data)
+
 
 
 
